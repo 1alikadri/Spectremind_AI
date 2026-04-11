@@ -154,3 +154,10 @@ SpectreMind is intended for authorized lab use, defensive research, and controll
 ## Repo notes
 
 Do not commit local runtime data, generated session artifacts, local databases, or environment secrets.
+
+## License and usage
+
+This repository is source-visible for portfolio and evaluation purposes.
+All rights are reserved.
+No reuse, redistribution, or derivative works are permitted without prior written permission.
+See the LICENSE file for details.
