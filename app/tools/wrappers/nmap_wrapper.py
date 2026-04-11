@@ -5,6 +5,7 @@ from app.tools.base import BaseTool
 
 class NmapWrapper(BaseTool):
     name = "nmap"
+    timeout_seconds = 120
 
     def run(self, target: str) -> dict:
         command = ["nmap", "-Pn", "-sV", target]
@@ -14,7 +15,8 @@ class NmapWrapper(BaseTool):
                 command,
                 capture_output=True,
                 text=True,
-                check=False
+                check=False,
+                timeout=self.timeout_seconds,
             )
             return {
                 "tool": self.name,
@@ -22,6 +24,14 @@ class NmapWrapper(BaseTool):
                 "stdout": result.stdout,
                 "stderr": result.stderr,
                 "returncode": result.returncode,
+            }
+        except subprocess.TimeoutExpired:
+            return {
+                "tool": self.name,
+                "command": " ".join(command),
+                "stdout": "",
+                "stderr": f"nmap timed out after {self.timeout_seconds} seconds.",
+                "returncode": 124,
             }
         except FileNotFoundError:
             return {

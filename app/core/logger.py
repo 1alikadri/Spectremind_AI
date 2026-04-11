@@ -1,4 +1,5 @@
-from datetime import datetime
+
+from datetime import UTC, datetime
 from pathlib import Path
 import json
 from typing import Any
@@ -14,7 +15,7 @@ def append_event(log_path: Path, event_type: str, payload: dict) -> None:
     log_path.parent.mkdir(parents=True, exist_ok=True)
 
     record = {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "event_type": event_type,
         "payload": payload,
     }

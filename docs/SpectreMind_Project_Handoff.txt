@@ -1,0 +1,423 @@
+SpectreMind Project Handoff
+Date: 2026-04-10
+
+==================================================
+1. What SpectreMind Is
+==================================================
+
+SpectreMind is a local-first, operator-controlled, session-based intelligence system for structured security work.
+
+It is not meant to be a reckless autonomous hacking agent. It is meant to be a disciplined operator companion that helps with:
+- interpreting requests
+- planning actions
+- enforcing scope and approval boundaries
+- executing bounded local tools
+- preserving evidence
+- storing session memory
+- surfacing useful follow-up suggestions
+- generating clear reports
+
+The design philosophy is simple:
+SpectreMind should think with the operator, not instead of the operator.
+
+Externally, the operator interacts with one system: SpectreMind.
+Internally, SpectreMind uses specialized roles:
+- AETHER = planner/orchestrator mind
+- WATCHER = session intelligence and disciplined memory layer
+- SCRIBE = reporting layer
+
+Core doctrine that must remain intact:
+- local-first
+- explicit approval for execution
+- single-target scope validation for operational actions
+- evidence-driven outputs
+- session-based workflows
+- memory-aware but not noisy
+- one unified external voice
+
+==================================================
+2. Current High-Level Architecture
+==================================================
+
+Main flow:
+1. Operator sends a request
+2. Intent parser handles hard-rule blocking first
+3. Deterministic rule parsing catches explicit supported requests
+4. Bounded LLM-assisted router handles ambiguous but allowed requests
+5. SpectreMindCore normalizes and routes the request
+6. Orchestrator builds and runs the operational path when applicable
+7. Scope validation and approval gating occur before execution
+8. Tool runs locally
+9. Raw artifacts are saved
+10. Parsed findings are stored
+11. WATCHER processes structured results into session intelligence
+12. SCRIBE generates report output
+13. Chat messages and session state are persisted
+14. SpectreMind returns one unified response to the operator
+
+Key subsystems:
+- app/core/spectremind_core.py = single external voice and main router
+- app/core/orchestrator.py = operational execution spine
+- app/core/intent_parser.py = rule-first parser plus bounded router fallback
+- app/core/intent_router.py = LLM-assisted intent recovery for ambiguous but allowed phrasing
+- app/core/memory_service.py = chat/session/long-term memory service
+- app/core/scope.py = strict single-target validation
+- app/agents/aether.py = planning and action selection
+- app/agents/watcher.py = deterministic session intelligence
+- app/agents/scribe.py = reporting
+- app/storage/db.py = SQLite persistence layer
+- app/tools/registry.py = structured tool registry
+- app/tools/tool_cards.py = tool metadata system
+
+==================================================
+3. Current Functional State
+==================================================
+
+What is already working:
+
+A. Sessions
+- create sessions
+- reuse named sessions
+- resolve latest session
+- list recent sessions
+- inspect session details
+- inspect artifacts
+- inspect findings
+- inspect reports
+
+B. Operational flow
+- natural-language ask path
+- task creation through SpectreMindCore
+- planning through AETHER
+- approval gating before operational execution
+- strict single-target validation
+- local Nmap wrapper execution
+- raw stdout/stderr artifact saving
+- parsed output extraction
+- finding persistence
+- WATCHER processing
+- report generation through SCRIBE
+
+C. Memory
+- chat_messages persistence
+- session_state persistence
+- long_term_memories persistence
+- operator-facing save_memory intent
+- operator-facing recall_memory intent
+- session chat logging for ask/system actions
+- session-state updates after operational actions
+
+D. Intent routing
+- hard-block unsafe wording first
+- deterministic handling for obvious supported requests
+- bounded LLM-assisted routing for ambiguous but allowed requests
+- fail-closed behavior when routing is unclear
+- broader natural phrasing for session/report/memory/operational requests
+
+E. Tool intelligence layer, first cut
+- tools are no longer only wrappers
+- registry now uses structured tool metadata
+- run_nmap now has a ToolCard with execution rules and operator meaning
+- orchestrator surfaces selected tool metadata in results
+
+==================================================
+4. Internal Agent Roles
+==================================================
+
+AETHER
+Purpose:
+- classify tasks
+- choose action type
+- route execution path
+- remain bounded and not become a chaotic suggestion engine
+
+WATCHER
+Purpose:
+- observe structured results
+- maintain concise session intelligence
+- generate deterministic suggestions based on real triggers
+- preserve unresolved items and useful observations
+
+SCRIBE
+Purpose:
+- convert structured findings into readable operator-facing reports
+- summarize without inventing facts
+- keep parser output as source of truth
+
+==================================================
+5. Important Safety and Control Principles
+==================================================
+
+These must remain intact:
+- explicit approval before execution
+- strict scope validation for operational actions
+- no blind automation
+- no invented targets or sessions
+- no uncontrolled multi-step execution loops
+- memory should remain disciplined, not bloated
+- routing should fail closed when uncertain
+- SpectreMind should stay unified externally even if internally multi-role
+
+In plain terms:
+usefulness should grow, but control must remain stronger than convenience.
+
+==================================================
+6. What Has Been Completed By Sprint
+==================================================
+
+Sprint 1 — Core stabilization
+Status: DONE
+
+What was achieved:
+- stabilized sessions behavior
+- improved ask and sessions truthfulness
+- cleaned orchestration flow
+- hardened LLM client boundary
+- fixed parser gaps in the early phase
+- locked the core execution spine with tests
+
+Purpose of this sprint:
+Lock the foundation before expanding capability.
+
+--------------------------------------------------
+Sprint 2 — Memory foundation
+Status: DONE
+
+What was achieved:
+- added chat_messages persistence
+- added session_state persistence
+- added long_term_memories persistence
+- built MemoryService
+- wired chat persistence into the live ask flow
+- wired session-state updates into the operational path
+- kept WATCHER as disciplined session intelligence instead of generic chatbot memory
+
+Purpose of this sprint:
+Create real memory infrastructure before exposing it to the operator.
+
+--------------------------------------------------
+Sprint 3 — Memory intents and operator recall
+Status: DONE
+
+What was achieved:
+- added save_memory intent
+- added recall_memory intent
+- extended intent schema
+- extended intent parser
+- extended SpectreMindCore to handle memory actions
+- surfaced memory results in CLI output
+- added tests for memory intent handling
+
+Purpose of this sprint:
+Turn stored memory into operator-usable memory.
+
+--------------------------------------------------
+Sprint 4A — Two-stage intent upgrade
+Status: DONE
+
+What was achieved:
+- kept hard-rule blocking as the first wall
+- kept deterministic parsing for explicit supported requests
+- added bounded LLM-assisted intent routing for ambiguous but allowed requests
+- hardened LLM JSON handling through llm_client helpers
+- made parser fail closed if router could not justify an action
+
+Purpose of this sprint:
+Improve routing accuracy without weakening control.
+
+--------------------------------------------------
+Sprint 4B — Broader natural operator phrasing
+Status: DONE
+
+What was achieved:
+- expanded session phrasing support
+- expanded report phrasing support
+- expanded memory phrasing support
+- expanded operational phrasing support when a real target exists
+- preserved bounded routing behavior
+- preserved fail-closed behavior
+
+Examples enabled by this phase:
+- “open last session”
+- “summarize latest engagement”
+- “what did we note about ssh”
+- “inspect 10.0.0.1”
+
+Purpose of this sprint:
+Make SpectreMind more fluent for real operator use while remaining bounded.
+
+--------------------------------------------------
+Sprint 5 — Tool intelligence layer
+Status: IN PROGRESS
+
+What has already been completed:
+- introduced structured tool metadata via app/tools/tool_cards.py
+- upgraded registry.py from simple wrappers to ToolRegistration objects
+- created ToolCard metadata for run_nmap
+- ToolCard includes:
+  - key
+  - display_name
+  - summary
+  - approval_class
+  - scope_rule
+  - allowed_categories
+  - arguments
+  - artifacts
+  - common_followups
+  - failure_modes
+  - operator_notes
+- patched OrchestratorResult to include tool_card
+- replaced orchestrator flow so it reads tool metadata instead of assuming blind wrapper behavior
+- main CLI now surfaces selected tool and approval class
+- tests were updated and passed
+
+Purpose of this sprint:
+Make tools self-describing operational instruments instead of opaque wrappers.
+
+Current Sprint 5 state:
+First cut is DONE.
+Next part of Sprint 5 is the immediate live target.
+
+--------------------------------------------------
+Sprint 6 — Backend service layer
+Status: NOT STARTED
+
+Planned objective:
+Wrap the stable core in FastAPI and split responsibilities into service layers such as:
+- chat service
+- orchestrator service
+- memory service
+- session service
+- tool service
+- report service
+
+Purpose:
+Prepare SpectreMind for a real operator-facing application backend.
+
+--------------------------------------------------
+Sprint 7 — Operator UI
+Status: NOT STARTED
+
+Planned objective:
+Build the first actual SpectreMind interface with:
+- chat
+- current session
+- findings
+- artifacts
+- memory
+- approval controls
+
+Purpose:
+Make SpectreMind itself the operator face instead of relying on model-host UI.
+
+--------------------------------------------------
+Sprint 8 — Consolidation and packaging
+Status: NOT STARTED
+
+Planned objective:
+- memory consolidation
+- import/export
+- backups
+- startup scripts
+- environment setup
+- prompt architecture cleanup
+- usability polish
+- packaging for day-to-day use
+
+Purpose:
+Turn the system from a working dev project into an operator-ready platform.
+
+==================================================
+7. Current Code-Level State Worth Remembering
+==================================================
+
+A. Tool system
+Current state:
+- app/tools/tool_cards.py exists
+- app/tools/registry.py returns ToolRegistration objects
+- run_nmap is represented as a structured tool entry instead of a blind wrapper
+
+B. Orchestration
+Current state:
+- app/core/orchestrator.py uses tool_entry.card and tool_entry.tool
+- approval and scope checks are still enforced
+- tool metadata is surfaced in response payloads
+
+C. Responses
+Current state:
+- app/schemas/responses.py includes tool_card in OrchestratorResult
+
+D. CLI
+Current state:
+- main pretty_print surfaces tool display_name, key, and approval class
+- memory recall is surfaced in operator output
+
+E. Tests
+Current state:
+- all tests passed after the Sprint 5 first cut
+
+==================================================
+8. What Should Happen Next
+==================================================
+
+Immediate next target:
+Continue Sprint 5.
+
+Recommended next slice inside Sprint 5:
+1. Add richer tool metadata behavior:
+   - preconditions
+   - postconditions
+   - safety notes
+   - argument validation metadata
+2. Introduce a tool resolution/helper layer so Orchestrator does not hardcode run_nmap forever
+3. Prepare generic tool selection and generic execution flow for future tools
+4. Keep explicit approval and scope validation intact
+5. Keep all changes incremental and test-backed
+
+Important strategic note:
+Do not jump to UI or FastAPI yet.
+The mind and hands of the system must be made cleaner before a face is added.
+
+==================================================
+9. What Must Not Be Lost In Future Work
+==================================================
+
+Do not regress these properties:
+- one external voice through SpectreMindCore
+- explicit approval before execution
+- strict single-target validation for bounded operations
+- evidence preserved locally
+- parser output remains the source of truth for findings
+- WATCHER remains disciplined and deterministic
+- routing fails closed when uncertain
+- memory remains concise and intentional
+- tools remain operator-bounded, not autonomous
+
+If these are weakened, SpectreMind will drift away from its goal.
+
+==================================================
+10. One-Paragraph Project Identity
+==================================================
+
+SpectreMind is a disciplined local intelligence system for authorized security work. It is designed to help an operator plan, validate, execute, remember, and report inside a session-based workflow while preserving control, scope, and evidence. It should become more fluent, more useful, and more capable over time, but never at the cost of operator control, bounded execution, or architectural clarity.
+
+==================================================
+11. Current Snapshot Summary
+==================================================
+
+Completed:
+- Sprint 1
+- Sprint 2
+- Sprint 3
+- Sprint 4A
+- Sprint 4B
+- Sprint 5 first cut
+
+Live target now:
+- Continue Sprint 5
+
+Best next move:
+- deepen tool intelligence and generic tool execution support
+- do not jump ahead to UI or backend service layer yet
+
+End of handoff.

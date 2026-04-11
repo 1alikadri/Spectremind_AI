@@ -1,6 +1,0 @@
-{"timestamp": "2026-04-08T21:26:09.104034", "event_type": "task_classified", "payload": {"id": "d942b091-c23f-4f9c-9b55-393d49349d17", "session_id": "2229f376-fd3b-4a26-8c0e-628a27e23e2c", "objective": "Scan my lab VM", "target": "192.168.1.10", "category": "recon", "approved": true, "created_at": "2026-04-08T21:26:09.099344"}}
-{"timestamp": "2026-04-08T21:26:10.265608", "event_type": "plan_created", "payload": {"agent": "AETHER", "action": "run_nmap", "reason": "Initial reconnaissance of lab VM"}}
-{"timestamp": "2026-04-08T21:26:10.265945", "event_type": "scope_checked", "payload": {"allowed": true, "normalized_target": "192.168.1.10", "reason": "Valid single IP target."}}
-{"timestamp": "2026-04-08T21:26:13.554583", "event_type": "tool_executed", "payload": {"tool": "nmap", "command": "nmap -sV 192.168.1.10", "stdout": "Starting Nmap 7.99 ( https://nmap.org ) at 2026-04-08 14:26 -0700\nNote: Host seems down. If it is really up, but blocking our ping probes, try -Pn\nNmap done: 1 IP address (0 hosts up) scanned in 3.26 seconds\n", "stderr": "", "returncode": 0}}
-{"timestamp": "2026-04-08T21:26:13.560974", "event_type": "tool_parsed", "payload": {"host": null, "open_ports": [], "services": [], "port_details": [], "os_hint": null}}
-{"timestamp": "2026-04-08T21:26:13.561673", "event_type": "next_steps_suggested", "payload": {"steps": []}}

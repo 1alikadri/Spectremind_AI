@@ -1,5 +1,6 @@
+# app/core/session.py
 from pathlib import Path
-from datetime import datetime
+from datetime import UTC, datetime
 import uuid
 import json
 
@@ -15,7 +16,7 @@ def create_session(name: str | None = None) -> dict:
     session_data = {
         "session_id": session_id,
         "name": name,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "status": "active",
     }
 

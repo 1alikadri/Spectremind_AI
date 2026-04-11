@@ -1,13 +1,30 @@
+from __future__ import annotations
+
 import json
 
+from app.config import (
+    LLM_API_BASE,
+    LLM_CHAT_COMPLETIONS_PATH,
+    LLM_MODEL,
+    LLM_TIMEOUT_SECONDS,
+)
+from app.core.llm_client import LocalLLMClient, LocalLLMError
 from app.schemas.tasks import Task
-from app.core.llm_client import LocalLLMClient
-from app.config import LLM_BASE_URL, LLM_MODEL
+
+
+ALLOWED_CATEGORIES = {"recon", "reporting", "unknown"}
+ALLOWED_ACTIONS = {"run_nmap", "generate_report_only", "manual_review"}
+ALLOWED_AGENTS = {"AETHER", "SCRIBE"}
 
 
 class AetherAgent:
     def __init__(self) -> None:
-        self.llm = LocalLLMClient(base_url=LLM_BASE_URL, model=LLM_MODEL)
+        self.llm = LocalLLMClient(
+            base_url=LLM_API_BASE,
+            model=LLM_MODEL,
+            timeout=LLM_TIMEOUT_SECONDS,
+            chat_completions_path=LLM_CHAT_COMPLETIONS_PATH,
+        )
 
     def classify_task(self, objective: str) -> str:
         text = objective.lower()
@@ -21,6 +38,28 @@ class AetherAgent:
             return "reporting"
         return "unknown"
 
+    def _validate_plan(self, plan: dict) -> dict:
+        category = str(plan.get("category", "")).strip().lower()
+        action = str(plan.get("action", "")).strip()
+        agent = str(plan.get("agent", "AETHER")).strip().upper()
+        reason = str(plan.get("reason", "LLM-generated plan")).strip() or "LLM-generated plan"
+
+        if category not in ALLOWED_CATEGORIES:
+            raise ValueError(f"Invalid category from LLM: {category}")
+
+        if action not in ALLOWED_ACTIONS:
+            raise ValueError(f"Invalid action from LLM: {action}")
+
+        if agent not in ALLOWED_AGENTS:
+            raise ValueError(f"Invalid agent from LLM: {agent}")
+
+        return {
+            "agent": agent,
+            "category": category,
+            "action": action,
+            "reason": reason,
+        }
+
     def plan(self, task: Task) -> dict:
         fallback_category = self.classify_task(task.objective)
 
@@ -29,6 +68,7 @@ You are AETHER, the orchestration mind of a local security lab assistant.
 Return only valid JSON.
 Choose one category from: recon, reporting, unknown
 Choose one action from: run_nmap, generate_report_only, manual_review
+Choose one agent from: AETHER, SCRIBE
 Keep reasoning short.
 """
 
@@ -48,19 +88,17 @@ Return JSON with:
 
         try:
             raw = self.llm.chat(system_prompt, user_prompt)
-            plan = json.loads(raw)
+            parsed = json.loads(raw)
+            validated = self._validate_plan(parsed)
 
-            if "category" not in plan or "action" not in plan:
-                raise ValueError("Missing required keys in LLM plan.")
-
-            task.category = plan["category"]
+            task.category = validated["category"]
             return {
-                "agent": plan.get("agent", "AETHER"),
-                "action": plan["action"],
-                "reason": plan.get("reason", "LLM-generated plan"),
+                "agent": validated["agent"],
+                "action": validated["action"],
+                "reason": validated["reason"],
             }
 
-        except Exception:
+        except (json.JSONDecodeError, ValueError, LocalLLMError):
             task.category = fallback_category
 
             if task.category == "recon":
@@ -82,44 +120,3 @@ Return JSON with:
                 "action": "manual_review",
                 "reason": "Fallback triggered due to unclear task or LLM failure.",
             }
-
-    def suggest_next_steps(self, parsed_output: dict) -> list:
-        suggestions = []
-        port_details = parsed_output.get("port_details", [])
-        filtered_summary = (parsed_output.get("filtered_summary") or "").lower()
-        host_status = (parsed_output.get("host_status") or "").lower()
-
-        if not port_details:
-            if host_status == "up":
-                suggestions.append("run_full_port_scan")
-
-            if filtered_summary:
-                suggestions.append("run_udp_scan")
-                suggestions.append("analyze_firewall_rules")
-
-            return sorted(set(suggestions))
-
-        for port in port_details:
-            service = (port.get("service") or "").lower()
-            version = (port.get("version") or "").lower()
-            combined = f"{service} {version}"
-
-            if "http" in combined:
-                suggestions.append("run_http_probe")
-
-            if "ssh" in combined:
-                suggestions.append("check_ssh_auth_methods")
-
-            if "smb" in combined or "microsoft-ds" in combined or "netbios" in combined:
-                suggestions.append("enumerate_smb")
-
-            if "ftp" in combined:
-                suggestions.append("check_ftp_anonymous_access")
-
-            if "mysql" in combined:
-                suggestions.append("identify_mysql_exposure")
-
-            if "rdp" in combined or "ms-wbt-server" in combined:
-                suggestions.append("inspect_rdp_exposure")
-
-        return sorted(set(suggestions))

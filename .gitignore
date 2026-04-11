@@ -1,11 +1,43 @@
+# Python
 __pycache__/
-*.pyc
-
-.env
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .venv/
 venv/
+env/
 
-data/sessions/*
-!data/sessions/.gitkeep
+# Local environment
+.env
+.env.local
+.env.*
+!.env.example
 
-data/*.db
+# Runtime data
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dist/
+
+# Logs
+*.log
+
+# Temporary local files
+logos.png
+Fix.gitignore
+New Text Document - Copy.txt

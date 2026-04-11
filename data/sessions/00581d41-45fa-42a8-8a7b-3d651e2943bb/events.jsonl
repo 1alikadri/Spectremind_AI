@@ -1,4 +1,0 @@
-{"timestamp": "2026-04-08T20:09:52.876156", "event_type": "task_classified", "payload": {"id": "6396ea6e-8991-47d6-b549-586f4f670a7b", "session_id": "00581d41-45fa-42a8-8a7b-3d651e2943bb", "objective": "scan my lab host", "target": "127.0.0.1", "category": "recon", "approved": true, "created_at": "2026-04-08T20:09:52.876090"}}
-{"timestamp": "2026-04-08T20:09:52.876480", "event_type": "plan_created", "payload": {"agent": "AETHER", "action": "run_nmap", "reason": "Task appears to be reconnaissance-oriented."}}
-{"timestamp": "2026-04-08T20:09:52.878768", "event_type": "tool_executed", "payload": {"tool": "nmap", "command": "nmap -sV 127.0.0.1", "stdout": "", "stderr": "nmap is not installed or not in PATH.", "returncode": 127}}
-{"timestamp": "2026-04-08T20:09:52.879313", "event_type": "tool_parsed", "payload": {"open_ports": [], "services": []}}

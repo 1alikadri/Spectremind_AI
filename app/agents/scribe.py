@@ -1,30 +1,41 @@
-from datetime import datetime
-from app.core.llm_client import LocalLLMClient
-from app.config import LLM_BASE_URL, LLM_MODEL
+from datetime import UTC, datetime
+
+from app.config import (
+    LLM_API_BASE,
+    LLM_CHAT_COMPLETIONS_PATH,
+    LLM_MODEL,
+    LLM_TIMEOUT_SECONDS,
+)
+from app.core.llm_client import LocalLLMClient, LocalLLMError
 
 
 class ScribeAgent:
     def __init__(self) -> None:
-        self.llm = LocalLLMClient(base_url=LLM_BASE_URL, model=LLM_MODEL)
+        self.llm = LocalLLMClient(
+            base_url=LLM_API_BASE,
+            model=LLM_MODEL,
+            timeout=LLM_TIMEOUT_SECONDS,
+            chat_completions_path=LLM_CHAT_COMPLETIONS_PATH,
+        )
 
     def summarize_findings(self, objective: str, parsed_output: dict) -> str:
-        system_prompt = """
-You are SCRIBE.
-Write a concise operator-facing summary of findings from structured scan data.
-Do not invent results.
-"""
+        host = parsed_output.get("host") or "Unknown"
+        host_status = parsed_output.get("host_status") or "unknown"
+        open_ports = parsed_output.get("open_ports", []) or []
+        services = parsed_output.get("services", []) or []
+        filtered_summary = parsed_output.get("filtered_summary")
 
-        user_prompt = f"""
-Objective: {objective}
+        parts = [
+            f"Target: {host}",
+            f"Host status: {host_status}",
+            f"Open ports: {', '.join(map(str, open_ports)) if open_ports else 'none'}",
+            f"Services: {', '.join(services) if services else 'none'}",
+        ]
 
-Parsed Output:
-{parsed_output}
-"""
+        if filtered_summary:
+            parts.append(f"Filtered summary: {filtered_summary}")
 
-        try:
-            return self.llm.chat(system_prompt, user_prompt)
-        except Exception:
-            return "LLM summary unavailable. Review structured findings below."
+        return " | ".join(parts)
 
     def generate_markdown_report(self, session_id: str, objective: str, parsed_output: dict) -> str:
         port_details = parsed_output.get("port_details", [])
@@ -38,7 +49,7 @@ Parsed Output:
             "# SpectreMind Session Report",
             "",
             f"- Session ID: `{session_id}`",
-            f"- Generated: {datetime.utcnow().isoformat()} UTC",
+            f"- Generated: {datetime.now(UTC).isoformat()}",
             f"- Objective: {objective}",
             f"- Host: {host}",
             f"- Host Status: {host_status}",
@@ -62,12 +73,14 @@ Parsed Output:
         else:
             lines.append("- No open ports detected")
 
-        lines.extend([
-            "",
-            "## Analyst Notes",
-            "",
-            "- Structured parser output is the source of truth.",
-            "- Review raw tool evidence before any further action.",
-        ])
+        lines.extend(
+            [
+                "",
+                "## Analyst Notes",
+                "",
+                "- Structured parser output is the source of truth.",
+                "- Review raw tool evidence before any further action.",
+            ]
+        )
 
         return "\n".join(lines)
