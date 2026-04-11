@@ -1,160 +1,156 @@
 # SpectreMind
 
-SpectreMind is a local-first modular security research and authorized red-team assistant built as a controlled operator system, not an autonomous black box.
+SpectreMind is a local-first, operator-controlled intelligence system for structured security work.
 
-The current version focuses on a clean execution spine:
+It is designed to think with the operator, not instead of the operator.
 
-User input → task planning → scope validation → tool execution → parsing → storage → reporting
+## What SpectreMind is
 
-It is designed to be transparent, session-based, and extensible, so every action can be inspected, logged, and improved over time.
+SpectreMind combines a Python execution core, a FastAPI service layer, and a Next.js operator console into one disciplined system for:
 
-## Current Capabilities
+- session-based reconnaissance workflows
+- structured tool execution
+- findings extraction and storage
+- report generation
+- session memory and long-term memory
+- operator-facing review through a clean UI
 
-- Session-based task execution
-- Controlled orchestration with AETHER
-- Nmap wrapper integration for recon
-- Structured parsing of Nmap output
-- SQLite storage for sessions, tasks, tool runs, and findings
-- Markdown report generation with SCRIBE
-- Event logging with per-session trace history
-- Basic natural language task handling through `ask`
-- Scope validation and approval gating
+SpectreMind is not positioned as an autonomous “AI hacker.” It is built around explicit approval, bounded execution, replayable logs, and visible evidence.
 
-## Architecture
+## Current architecture
 
-SpectreMind currently works through this flow:
+### Core intelligence
+- **SpectreMindCore**: the single external voice and routing layer
+- **AETHER**: planning and action selection
+- **WATCHER**: session intelligence, observations, unresolved items, and follow-up suggestions
+- **SCRIBE**: report generation
 
-```text
-User / CLI
-   ↓
-Task Creation
-   ↓
-AETHER Planning
-   ↓
-Scope Validation
-   ↓
-Tool Execution
-   ↓
-Output Parsing
-   ↓
-SQLite Storage
-   ↓
-SCRIBE Reporting
-   ↓
-CLI Output / Session Artifacts
-Project Structure
-spectremind/
-├── app/
-│   ├── main.py
-│   ├── config.py
-│   ├── schemas/
-│   ├── core/
-│   ├── agents/
-│   ├── tools/
-│   ├── parsers/
-│   ├── storage/
-│   └── reports/
-├── data/
-│   ├── spectremind.db
-│   └── sessions/
-├── tests/
-├── docs/
-├── requirements.txt
-└── README.md
-Implemented Components
-AETHER
+### Execution pipeline
+- intent parsing
+- task creation
+- approval-aware orchestration
+- scope validation
+- tool execution
+- raw artifact capture
+- parser output
+- findings persistence
+- report generation
+- session memory updates
 
-Handles task classification, planning, and operational routing.
+### Service layer
+FastAPI exposes SpectreMind through operator-facing routes such as:
 
-SCRIBE
+- `/chat/ask`
+- `/chat/history`
+- `/sessions`
+- `/findings`
+- `/tool-runs`
+- `/reports`
+- `/memory`
 
-Builds structured markdown reports from parsed findings and session events.
+### Operator console
+The frontend provides a three-column operator console with:
 
-Tool Layer
+- session sidebar
+- command surface
+- active engagement context
+- evidence tabs
+- structured assistant output
+- report viewer
+- global memory panel
 
-Currently includes an Nmap wrapper for controlled reconnaissance.
+## Current capabilities
 
-Parser Layer
+- session creation and session switching
+- scoped natural-language command handling
+- explicit approval before execution
+- Nmap-based service scanning
+- structured findings storage
+- tool run history
+- markdown report generation
+- WATCHER summaries and next-step suggestions
+- session chat persistence
+- long-term memory save and recall
+- branded operator console UI
 
-Extracts structured findings such as:
+## Operator workflow
 
-host
-host status
-filtered summary
-open ports
-services
-port details
-OS hints
-Storage Layer
+1. Create or select a session
+2. Issue a bounded request in the command surface
+3. Explicitly approve execution when required
+4. Review findings, tool runs, reports, and memory
+5. Use structured output and WATCHER suggestions for next actions
 
-Uses SQLite for persistent storage of:
+## Screenshots
 
-sessions
-tasks
-tool runs
-findings
-Session Artifacts
+These screenshots reflect the current UI state and should be stored under `docs/images/` in the repo.
 
-Each session stores:
+### Full operator console
+![SpectreMind Operator Console](docs/images/operator-console.png)
 
-session.json
-report.md
-nmap_stdout.txt
-nmap_stderr.txt
-events.jsonl
-Example Commands
+### Structured report view
+![Structured Report](docs/images/structured-report.png)
 
-Initialize a session:
+### Findings panel
+![Findings Panel](docs/images/findings-panel.png)
 
-python -m app.main init --name vm-test
+### Tool runs panel
+![Tool Runs Panel](docs/images/tool-runs-panel.png)
 
-Run a scan:
+### Global memory panel
+![Global Memory Panel](docs/images/global-memory-panel.png)
 
-python -m app.main run --objective "Scan my lab VM" --target 192.168.1.10 --approved
+### Structured output details
+![Structured Output Details](docs/images/structured-output-details.png)
 
-List sessions:
+### Backend API running
+![Backend API Running](docs/images/backend-api-running.png)
 
-python -m app.main sessions
+### Frontend dev server running
+![Frontend Dev Server Running](docs/images/frontend-dev-running.png)
 
-Show findings from latest session:
+### LM Studio local model
+![LM Studio Local Model](docs/images/lm-studio.png)
 
-python -m app.main findings --latest
+## Project status
 
-Show report:
+- Sprint 0 to Sprint 7 complete
+- Current milestone: operator UI is complete and productized
+- Next milestone: UX intelligence and deeper operator assistance
 
-python -m app.main report --latest
+See:
 
-Use natural language interface:
+- `docs/README.md`
+- `docs/SPECTREMIND_GOAL.md`
+- `docs/SPECTREMIND_SPRINT_PLAN.md`
+- `docs/PROJECT_FILE_MAP.md`
+- `docs/SETUP.md`
+- `docs/SCREENSHOTS.md`
 
-python -m app.main ask "scan 192.168.1.10"
-Design Principles
-Local-first
-Operator-controlled
-Explicit scope validation
-Full command visibility
-Session traceability
-Modular agent and wrapper design
-Extensible architecture for future memory, routing, and multi-agent behavior
-Current Status
+## Quick start
 
-SpectreMind is in active development.
+### Backend
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+python -m uvicorn app.api.main:app --reload
+```
 
-The current milestone delivers a working vertical slice:
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-task in
-plan created
-tool executed
-output parsed
-findings stored
-report generated
+### Local model server
+Run LM Studio locally and expose an OpenAI-compatible endpoint, then configure the backend to use it.
 
-This is the foundation for future expansion into:
+## Safety model
 
-selective memory retrieval
-multi-agent routing
-broader tool integration
-voice assistant workflows
-proactive suggestions
-Disclaimer
+SpectreMind is intended for authorized lab use, defensive research, and controlled operator workflows. Execution should remain bounded, reviewed, and explicitly approved.
 
-SpectreMind is being built for authorized security research, lab environments, and defensive learning. It is intended to remain controlled, inspectable, and operator-driven.
+## Repo notes
+
+Do not commit local runtime data, generated session artifacts, local databases, or environment secrets.

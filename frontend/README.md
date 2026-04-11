@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SpectreMind Frontend
 
-## Getting Started
+This frontend is the operator console for SpectreMind.
 
-First, run the development server:
+It is a Next.js application that talks to the SpectreMind FastAPI backend and exposes the live operator workflow through a structured interface.
 
+## What the frontend does
+
+The console provides:
+
+- **Sessions panel** for engagement selection and creation
+- **Command Surface** for natural-language interaction
+- **Active Engagement** header with selected session context
+- **Evidence** tabs for findings, tool runs, reports, and global memory
+- **Structured output** disclosure for inspecting assistant response metadata
+
+## Key UI areas
+
+### Session sidebar
+Shows current and recent engagements, status, finding counts, run counts, and memory presence.
+
+### Command surface
+Used to send requests such as:
+
+- `show sessions`
+- `show session`
+- `show findings`
+- `show tool runs`
+- `show report`
+- `scan hackthissite.org`
+
+Execution-sensitive requests are paired with explicit approval.
+
+### Evidence tabs
+The evidence area includes:
+
+- **Findings**
+- **Tool Runs**
+- **Report**
+- **Global Memory**
+
+### Structured report view
+Reports are rendered as operator-facing cards instead of raw markdown dumps.
+
+### Global memory
+Global memory is intentionally presented as long-term operator memory across engagements, while saved notes may still preserve source-session linkage.
+
+## Screenshots
+
+Expected repo path for images: `../docs/images/`
+
+![Operator Console](../docs/images/operator-console.png)
+![Structured Report](../docs/images/structured-report.png)
+![Global Memory](../docs/images/global-memory-panel.png)
+
+## Local development
+
+### 1. Install dependencies
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configure environment
+Create `.env.local` from `.env.example` and set the backend API URL.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Run dev server
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The app should start on:
 
-## Learn More
+- `http://localhost:3000`
 
-To learn more about Next.js, take a look at the following resources:
+## Environment variable
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### `NEXT_PUBLIC_API_BASE`
+Base URL for the SpectreMind FastAPI backend.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Example:
+```env
+NEXT_PUBLIC_API_BASE=http://127.0.0.1:8000
+```
 
-## Deploy on Vercel
+## Backend expectation
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The backend should be running before the UI is used, for example:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+python -m uvicorn app.api.main:app --reload
+```
+
+## Files of interest
+
+- `src/app/layout.tsx`
+- `src/app/page.tsx`
+- `src/components/layout/app-shell.tsx`
+- `src/components/sessions/session-sidebar.tsx`
+- `src/components/chat/chat-panel.tsx`
+- `src/components/evidence/*`
+- `src/lib/api.ts`
+- `src/types/api.ts`
+
+## Notes
+
+This frontend is part of a local-first operator-controlled system. It should preserve clarity, control, and evidence visibility rather than behave like a casual chatbot UI.
